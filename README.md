@@ -1,7 +1,7 @@
-# Repository Name
+# Linode Metadata Service Client for Go
 
-Repository description
+This package allows Go projects to easily interact with the Linode Metadata Service.
 
 ## Contribution Guidelines
 
-Want to improve [repository name]? Please start [here](CONTRIBUTING.md).
+Want to improve [metadata-go]? Please start [here](CONTRIBUTING.md).
