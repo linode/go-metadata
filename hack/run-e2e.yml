@@ -79,7 +79,7 @@
 
         - name: Run the E2E test suite
           args:
-            executable: /bin/bashl
+            executable: /bin/bash
           shell: |
             cd /go-metadata-{{ run_id }} && \
             source .test.env && \
