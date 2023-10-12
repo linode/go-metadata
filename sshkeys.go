@@ -1,8 +1,6 @@
-package main
+package metadata
 
-import (
-	"context"
-)
+import "context"
 
 type SSHKeysUserData struct {
 	Root []string `json:"root"`

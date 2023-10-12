@@ -1,8 +1,6 @@
-package main
+package metadata
 
-import (
-	"context"
-)
+import "context"
 
 func (c *Client) GetUserData(ctx context.Context) (string, error) {
 	// Getting user-data requires the text/plain content type

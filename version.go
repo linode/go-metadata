@@ -1,4 +1,4 @@
-package main
+package metadata
 
 import (
 	"fmt"
@@ -30,5 +30,5 @@ func init() {
 		}
 	}
 
-	DefaultUserAgent = fmt.Sprintf("linodego/%s https://github.com/linode/go-metadata", Version)
+	DefaultUserAgent = fmt.Sprintf("go-metadata/%s https://github.com/linode/go-metadata", Version)
 }

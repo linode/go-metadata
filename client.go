@@ -1,4 +1,4 @@
-package main
+package metadata
 
 import (
 	"context"
@@ -88,7 +88,7 @@ func NewClient(ctx context.Context, opts *ClientCreateOptions) (*Client, error) 
 }
 
 func (c *Client) UseToken(token string) *Client {
-	c.resty.SetHeader("X-Metadata-Token", token)
+	c.resty.SetHeader("Metadata-Token", token)
 	return c
 }
 
