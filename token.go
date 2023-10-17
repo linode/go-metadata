@@ -1,4 +1,4 @@
-package main
+package metadata
 
 import (
 	"context"
@@ -32,7 +32,7 @@ func (c *Client) GenerateToken(ctx context.Context, opts GenerateTokenOptions) (
 		tokenExpirySeconds = opts.ExpirySeconds
 	}
 
-	req.SetHeader("X-Metadata-Token-Expiry-Seconds", strconv.Itoa(tokenExpirySeconds))
+	req.SetHeader("Metadata-Token-Expiry-Seconds", strconv.Itoa(tokenExpirySeconds))
 
 	resp, err := req.Put("token")
 	if err != nil {

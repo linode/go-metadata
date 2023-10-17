@@ -1,0 +1,105 @@
+---
+- name: Deploy Test Linode
+  hosts: localhost
+  vars:
+    ssh_pubkey_path: ~/.ssh/id_rsa.pub
+    label: go-metadata-test
+    type: g6-standard-2
+    region: us-iad
+    temp_token_name: go-metadata-dev
+    token_duration_seconds: 3600
+  tasks:
+    - set_fact:
+        run_id: '{{ ansible_date_time.epoch }}'
+        temp_token_name: '{{ temp_token_name }}'
+
+    - name: Create a temporary token for the plugin to consume
+      linode.cloud.token:
+        label: "{{ temp_token_name }}-{{ run_id }}"
+        scopes: "events:read_write linodes:read_write"
+
+        # This token should expire in an hour by default
+        expiry: "{{ '%Y-%m-%dT%H:%M:%S' | strftime((ansible_date_time.epoch | int + token_duration_seconds), utc=True) }}"
+
+        state: present
+      register: temp_token
+
+    - name: Ensure the test instance is created
+      linode.cloud.instance:
+        label: "{{ label }}"
+        type: "{{ type }}"
+        region: "{{ region }}"
+        image: linode/ubuntu22.04
+        booted: true
+        authorized_keys:
+          - "{{ lookup('file', ssh_pubkey_path) }}"
+        state: present
+      register: create_inst
+
+    - name: Wait for SSH to be ready
+      wait_for: host="{{ create_inst.instance.ipv4[0] }}" port=22 delay=1  timeout=300
+
+    - name: Append host to the in-memory inventory
+      add_host:
+        hostname: "test-runner"
+        ansible_host: "{{ create_inst.instance.ipv4[0] }}"
+        groups: test_runner
+        ansible_user: root
+        temp_token: "{{ temp_token.token.token }}"
+        run_id: "{{ run_id }}"
+
+- name: Configure the test instance
+  hosts: test_runner
+  remote_user: root
+  gather_facts: no
+  vars:
+    debug: 0
+  tasks:
+    - block:
+        - name: Update repositories and install necessary packages
+          apt:
+            name: golang,make
+            update_cache: true
+
+        - name: Copy the local project to the remote
+          synchronize:
+            src: ../../
+            dest: "/go-metadata-{{ run_id }}"
+            rsync_opts:
+              - "--exclude=.git"
+              - "--exclude=venv"
+
+        - name: Write the configuration to an env file
+          copy:
+            dest: "/go-metadata-{{ run_id }}/.test.env"
+            content: |
+              export LINODE_DEBUG={{ debug }}
+              export LINODE_TOKEN={{ temp_token }}
+          no_log: true
+
+        - name: Run the E2E test suite
+          args:
+            executable: /bin/bash
+          shell: |
+            cd /go-metadata-{{ run_id }} && \
+            source .test.env && \
+            make e2e-local
+          register: run_tests
+
+      rescue:
+        - debug:
+            msg: Failed to run E2E tests, rescuing for cleanup...
+
+- name: Clean up
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Remove the temp token
+      linode.cloud.token:
+        label: "{{ temp_token_name }}-{{ run_id }}"
+        state: absent
+
+    - name: Exit if tests failed
+      assert:
+        that:
+          - "'ansible_failed_result' not in hostvars['test-runner']"

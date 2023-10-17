@@ -1,25 +1,29 @@
-package main
+package metadata
 
-import (
-	"context"
-)
+import "context"
 
 type InstanceBackupsData struct {
 	Enabled bool    `json:"enabled"`
 	Status  *string `json:"status"`
 }
 
+type InstanceSpecsData struct {
+	VCPUs    int `json:"vcpus"`
+	Memory   int `json:"memory"`
+	GPUs     int `json:"gpus"`
+	Transfer int `json:"transfer"`
+	Disk     int `json:"disk"`
+}
+
 type InstanceData struct {
-	LocalHostname string              `json:"local-hostname"`
-	Region        string              `json:"region"`
-	Type          string              `json:"type"`
-	Machine       string              `json:"string"`
-	ID            int                 `json:"id"`
-	InstanceID    int                 `json:"instance-id"`
-	CPUs          int                 `json:"cpus"`
-	Memory        int                 `json:"memory"`
-	Disk          int                 `json:"disk"`
-	Backups       InstanceBackupsData `json:"backups"`
+	ID       int                 `json:"id"`
+	Label    string              `json:"label"`
+	Region   string              `json:"region"`
+	Type     string              `json:"type"`
+	HostUUID string              `json:"host_uuid"`
+	Tags     []string            `json:"tags"`
+	Specs    InstanceSpecsData   `json:"specs"`
+	Backups  InstanceBackupsData `json:"backups"`
 }
 
 func (c *Client) GetInstance(ctx context.Context) (*InstanceData, error) {
