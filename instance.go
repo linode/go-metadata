@@ -16,13 +16,14 @@ type InstanceSpecsData struct {
 }
 
 type InstanceData struct {
-	ID      int                 `json:"id"`
-	Label   string              `json:"label"`
-	Region  string              `json:"region"`
-	Type    string              `json:"type"`
-	Tags    []string            `json:"tags"`
-	Specs   InstanceSpecsData   `json:"specs"`
-	Backups InstanceBackupsData `json:"backups"`
+	ID       int                 `json:"id"`
+	Label    string              `json:"label"`
+	Region   string              `json:"region"`
+	Type     string              `json:"type"`
+	HostUUID string              `json:"host_uuid"`
+	Tags     []string            `json:"tags"`
+	Specs    InstanceSpecsData   `json:"specs"`
+	Backups  InstanceBackupsData `json:"backups"`
 }
 
 func (c *Client) GetInstance(ctx context.Context) (*InstanceData, error) {
