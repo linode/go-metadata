@@ -2,46 +2,72 @@ package metadata
 
 import (
 	"context"
-	"math"
+	"fmt"
 	"strconv"
 	"time"
 )
 
-type GenerateTokenOptions struct {
+type TokenOption func(opts *tokenCreateOpts)
+
+// TokenWithExpiry configures the expiry in seconds for a token.
+// Default: 3600
+func TokenWithExpiry(seconds int) TokenOption {
+	return func(opts *tokenCreateOpts) {
+		opts.ExpirySeconds = seconds
+	}
+}
+
+type tokenCreateOpts struct {
 	ExpirySeconds int
 }
 
-type TokenData struct {
-	Token         string `json:"token"`
-	ExpirySeconds int
-	Created       time.Time
-}
-
-func (t *TokenData) IsExpired() bool {
-	return int(math.Ceil(time.Since(t.Created).Seconds())) > t.ExpirySeconds
-}
-
-func (c *Client) GenerateToken(ctx context.Context, opts GenerateTokenOptions) (*TokenData, error) {
-	// Temporary override so things don't break
-	req := c.R(ctx).
-		ExpectContentType("text/plain").
-		SetHeader("Content-Type", "text/plain")
-
-	tokenExpirySeconds := 3600
-	if opts.ExpirySeconds != 0 {
-		tokenExpirySeconds = opts.ExpirySeconds
+// GenerateToken generates a token to access the Metadata API.
+func (c *Client) GenerateToken(ctx context.Context, opts ...TokenOption) (string, error) {
+	// Handle create options
+	createOpts := tokenCreateOpts{
+		ExpirySeconds: 3600,
 	}
 
-	req.SetHeader("Metadata-Token-Expiry-Seconds", strconv.Itoa(tokenExpirySeconds))
+	for _, opt := range opts {
+		opt(&createOpts)
+	}
+
+	req := c.R(ctx).
+		SetResult(&[]string{}).
+		SetHeader("Metadata-Token-Expiry-Seconds", strconv.Itoa(createOpts.ExpirySeconds))
 
 	resp, err := req.Put("token")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &TokenData{
-		Token:         resp.String(),
-		ExpirySeconds: tokenExpirySeconds,
-		Created:       time.Now(),
-	}, nil
+	result := *resp.Result().(*[]string)
+
+	if len(result) < 1 {
+		return "", fmt.Errorf("no token returned from API")
+	}
+
+	return result[0], nil
+}
+
+// UseToken applies the given token to this Metadata client.
+func (c *Client) UseToken(token string) *Client {
+	c.resty.SetHeader("Metadata-Token", token)
+	return c
+}
+
+// RefreshToken generates and applies a new token for this client.
+func (c *Client) RefreshToken(ctx context.Context, opts ...TokenOption) (*Client, error) {
+	creationTime := time.Now()
+
+	token, err := c.GenerateToken(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate metadata token: %w", err)
+	}
+
+	c.UseToken(token)
+
+	c.managedTokenExpiry = creationTime
+
+	return c, nil
 }

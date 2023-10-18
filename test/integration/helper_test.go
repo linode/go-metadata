@@ -1,5 +1,3 @@
-//go:build integration
-
 package integration
 
 import (
@@ -19,7 +17,9 @@ func init() {
 		log.Fatal("LINODE_TOKEN must be specified to run the E2E test suite")
 	}
 
-	mdsClient, err := metadata.NewClient(context.Background(), nil)
+	mdsClient, err := metadata.NewClient(
+		context.Background(),
+	)
 	if err != nil {
 		log.Fatalf("failed to create client: %s", err)
 	}

@@ -26,10 +26,11 @@ type InstanceData struct {
 	Backups  InstanceBackupsData `json:"backups"`
 }
 
+// GetInstance gets various information about the current instance.
 func (c *Client) GetInstance(ctx context.Context) (*InstanceData, error) {
 	req := c.R(ctx).SetResult(&InstanceData{})
 
-	resp, err := req.Get("instance")
+	resp, err := coupleAPIErrors(req.Get("instance"))
 	if err != nil {
 		return nil, err
 	}
