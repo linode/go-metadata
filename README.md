@@ -1,6 +1,10 @@
 # Linode Metadata Service Client for Go
 
-This package allows Go projects to easily interact with the Linode Metadata Service.
+This package allows Go projects to easily interact with the [Linode Metadata Service](https://www.linode.com/docs/products/compute/compute-instances/guides/metadata/?tabs=linode-api).
+
+## Documentation
+
+See [godoc](https://pkg.go.dev/github.com/linode/go-metadata) for a complete documentation reference.
 
 ## Testing
 
