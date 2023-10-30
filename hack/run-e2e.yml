@@ -33,6 +33,8 @@
         booted: true
         authorized_keys:
           - "{{ lookup('file', ssh_pubkey_path) }}"
+        metadata:
+          user_data: foobar
         state: present
       register: create_inst
 

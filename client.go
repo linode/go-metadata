@@ -9,22 +9,12 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"time"
 )
 
 const APIHost = "169.254.169.254"
 const APIProto = "http"
 const APIVersion = "v1"
-
-type ClientCreateOptions struct {
-	HTTPClient *http.Client
-
-	BaseURLOverride string
-	VersionOverride string
-
-	UserAgentPrefix string
-
-	DisableTokenInit bool
-}
 
 type Client struct {
 	resty *resty.Client
@@ -33,35 +23,49 @@ type Client struct {
 	apiProtocol string
 	apiVersion  string
 	userAgent   string
+
+	managedToken       bool
+	managedTokenOpts   []TokenOption
+	managedTokenExpiry time.Time
 }
 
-func NewClient(ctx context.Context, opts *ClientCreateOptions) (*Client, error) {
-	var result Client
-
-	shouldUseHTTPClient := false
-	shouldSkipTokenGeneration := false
-	// We might need to move the version to a subpackage to prevent a cyclic dependency
-	userAgent := DefaultUserAgent
-
-	if opts != nil {
-		shouldUseHTTPClient = opts.HTTPClient != nil
-		shouldSkipTokenGeneration = opts.DisableTokenInit
-
-		if opts.BaseURLOverride != "" {
-			result.SetBaseURL(opts.BaseURLOverride)
-		}
-
-		if opts.VersionOverride != "" {
-			result.SetVersion(opts.VersionOverride)
-		}
-
-		if opts.UserAgentPrefix != "" {
-			userAgent = fmt.Sprintf("%s %s", opts.UserAgentPrefix, userAgent)
-		}
+// NewClient creates a new Metadata API client configured
+// with the given options.
+func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
+	clientOpts := clientCreateConfig{
+		HTTPClient:      nil,
+		BaseURLOverride: "",
+		VersionOverride: "",
+		UserAgentPrefix: "",
+		ManagedToken:    true,
+		StartingToken:   "",
 	}
 
-	if shouldUseHTTPClient {
-		result.resty = resty.NewWithClient(opts.HTTPClient)
+	for _, opt := range opts {
+		opt(&clientOpts)
+	}
+
+	var result Client
+
+	result.managedToken = clientOpts.ManagedToken
+	result.managedTokenOpts = clientOpts.ManagedTokenOpts
+
+	userAgent := DefaultUserAgent
+
+	if clientOpts.BaseURLOverride != "" {
+		result.SetBaseURL(clientOpts.BaseURLOverride)
+	}
+
+	if clientOpts.VersionOverride != "" {
+		result.SetVersion(clientOpts.VersionOverride)
+	}
+
+	if clientOpts.UserAgentPrefix != "" {
+		userAgent = fmt.Sprintf("%s %s", clientOpts.UserAgentPrefix, userAgent)
+	}
+
+	if clientOpts.HTTPClient != nil {
+		result.resty = resty.NewWithClient(clientOpts.HTTPClient)
 	} else {
 		result.resty = resty.New()
 	}
@@ -76,33 +80,22 @@ func NewClient(ctx context.Context, opts *ClientCreateOptions) (*Client, error) 
 
 	result.updateHostURL()
 
-	result.SetUserAgent(userAgent)
+	result.setUserAgent(userAgent)
 
-	if !shouldSkipTokenGeneration {
-		if _, err := result.RefreshToken(ctx); err != nil {
+	if clientOpts.ManagedToken && clientOpts.StartingToken == "" {
+		if _, err := result.RefreshToken(ctx, result.managedTokenOpts...); err != nil {
 			return nil, fmt.Errorf("failed to refresh metadata token: %s", err)
 		}
+	} else if clientOpts.StartingToken != "" {
+		result.UseToken(clientOpts.StartingToken)
 	}
+
+	result.resty.OnBeforeRequest(result.middlewareTokenRefresh)
 
 	return &result, nil
 }
 
-func (c *Client) UseToken(token string) *Client {
-	c.resty.SetHeader("Metadata-Token", token)
-	return c
-}
-
-func (c *Client) RefreshToken(ctx context.Context) (*Client, error) {
-	token, err := c.GenerateToken(ctx, GenerateTokenOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate metadata token: %w", err)
-	}
-
-	c.UseToken(token.Token)
-
-	return c, nil
-}
-
+// SetBaseURL configures the target URL for metadata API this client accesses.
 func (c *Client) SetBaseURL(baseURL string) *Client {
 	baseURLPath, _ := url.Parse(baseURL)
 
@@ -114,6 +107,7 @@ func (c *Client) SetBaseURL(baseURL string) *Client {
 	return c
 }
 
+// SetVersion configures the target metadata API version for this client.
 func (c *Client) SetVersion(version string) *Client {
 	c.apiVersion = version
 
@@ -142,17 +136,118 @@ func (c *Client) updateHostURL() {
 	c.resty.SetBaseURL(fmt.Sprintf("%s://%s/%s", apiProto, baseURL, apiVersion))
 }
 
+// middlewareTokenRefresh handles automatically refreshing managed tokens.
+func (c *Client) middlewareTokenRefresh(rc *resty.Client, r *resty.Request) error {
+	// Don't run this middleware when generating tokens
+	if r.URL == "token" {
+		return nil
+	}
+
+	if !c.managedToken || time.Now().Before(c.managedTokenExpiry) {
+		return nil
+	}
+
+	// Token needs to be refreshed
+	if _, err := c.RefreshToken(r.Context(), c.managedTokenOpts...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // R wraps resty's R method
 func (c *Client) R(ctx context.Context) *resty.Request {
 	return c.resty.R().
 		ExpectContentType("application/json").
 		SetHeader("Content-Type", "application/json").
-		SetContext(ctx)
+		SetContext(ctx).
+		SetError(APIError{})
 }
 
-func (c *Client) SetUserAgent(userAgent string) *Client {
+func (c *Client) setUserAgent(userAgent string) *Client {
 	c.userAgent = userAgent
 	c.resty.SetHeader("User-Agent", c.userAgent)
 
 	return c
+}
+
+type clientCreateConfig struct {
+	HTTPClient *http.Client
+
+	BaseURLOverride string
+	VersionOverride string
+
+	UserAgentPrefix string
+
+	ManagedToken     bool
+	ManagedTokenOpts []TokenOption
+
+	StartingToken string
+}
+
+// ClientOption is an option that can be used
+// during client creation.
+type ClientOption func(options *clientCreateConfig)
+
+// ClientWithHTTPClient configures the underlying HTTP client
+// to communicate with the Metadata API.
+func ClientWithHTTPClient(client *http.Client) ClientOption {
+	return func(options *clientCreateConfig) {
+		options.HTTPClient = client
+	}
+}
+
+// ClientWithBaseURL configures the target host of the
+// Metadata API this client points to.
+// Default: "169.254.169.254"
+func ClientWithBaseURL(baseURL string) ClientOption {
+	return func(options *clientCreateConfig) {
+		options.BaseURLOverride = baseURL
+	}
+}
+
+// ClientWithVersion configures the Metadata API version this
+// client should target.
+// Default: "v1"
+func ClientWithVersion(version string) ClientOption {
+	return func(options *clientCreateConfig) {
+		options.VersionOverride = version
+	}
+}
+
+// ClientWithUAPrefix configures the prefix for user agents
+// on API requests made by this client.
+func ClientWithUAPrefix(uaPrefix string) ClientOption {
+	return func(options *clientCreateConfig) {
+		options.UserAgentPrefix = uaPrefix
+	}
+}
+
+// ClientWithManagedToken configures the metadata client
+// to automatically generate and refresh the API token
+// for the Metadata client.
+func ClientWithManagedToken(opts ...TokenOption) ClientOption {
+	return func(options *clientCreateConfig) {
+		options.ManagedToken = true
+		options.ManagedTokenOpts = opts
+	}
+}
+
+// ClientWithoutManagedToken configures the metadata client
+// to disable automatic token management.
+func ClientWithoutManagedToken() ClientOption {
+	return func(options *clientCreateConfig) {
+		options.ManagedToken = false
+	}
+}
+
+// ClientWithToken configures the starting token
+// for the metadata client.
+// If this option is specified and managed tokens
+// are enabled for a client, the client will not
+// generate an initial Metadata API token.
+func ClientWithToken(token string) ClientOption {
+	return func(options *clientCreateConfig) {
+		options.StartingToken = token
+	}
 }

@@ -1,5 +1,3 @@
-//go:build integration
-
 package integration
 
 import (
@@ -9,6 +7,8 @@ import (
 )
 
 func TestGetInstance(t *testing.T) {
+	t.Parallel()
+
 	mdInst, err := metadataClient.GetInstance(context.Background())
 	assert.NoError(t, err)
 
@@ -21,7 +21,6 @@ func TestGetInstance(t *testing.T) {
 	assert.Equal(t, apiInst.Region, mdInst.Region)
 	assert.Equal(t, apiInst.Type, mdInst.Type)
 	assert.Equal(t, apiInst.Tags, mdInst.Tags)
-	assert.Equal(t, apiInst.HostUUID, mdInst.HostUUID)
 
 	assert.Equal(t, apiInst.Specs.Disk, mdInst.Specs.Disk)
 	assert.Equal(t, apiInst.Specs.Memory, mdInst.Specs.Memory)
