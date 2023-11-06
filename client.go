@@ -3,13 +3,14 @@ package metadata
 import (
 	"context"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 const APIHost = "169.254.169.254"
@@ -17,16 +18,14 @@ const APIProto = "http"
 const APIVersion = "v1"
 
 type Client struct {
-	resty *resty.Client
-
-	apiBaseURL  string
-	apiProtocol string
-	apiVersion  string
-	userAgent   string
-
-	managedToken       bool
-	managedTokenOpts   []TokenOption
 	managedTokenExpiry time.Time
+	resty              *resty.Client
+	apiBaseURL         string
+	apiProtocol        string
+	apiVersion         string
+	userAgent          string
+	managedTokenOpts   []TokenOption
+	managedToken       bool
 }
 
 // NewClient creates a new Metadata API client configured
