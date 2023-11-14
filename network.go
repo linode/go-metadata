@@ -21,7 +21,7 @@ type IPv6Data struct {
 	SLAAC        netip.Prefix   `json:"slaac"`
 	LinkLocal    netip.Prefix   `json:"link_local"`
 	Ranges       []netip.Prefix `json:"ranges"`
-	SharedRanges []netip.Prefix `json:"shared-ranges"`
+	SharedRanges []netip.Prefix `json:"shared_ranges"`
 }
 
 type NetworkData struct {
