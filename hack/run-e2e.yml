@@ -79,11 +79,11 @@
   tasks:
     - block:
         - name: Wait for cloud-init to finish initialization
-          command: cloud-init status
+          command: cloud-init status --format json
           retries: 30
           delay: 5
           register: cloud_init_status
-          until: cloud_init_status.rc == 0
+          until: (cloud_init_status.stdout | from_json)["status"] == "done"
 
         - name: Update repositories and install necessary packages
           become: yes
