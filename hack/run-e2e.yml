@@ -3,15 +3,29 @@
   hosts: localhost
   vars:
     ssh_pubkey_path: ~/.ssh/id_rsa.pub
-    label: go-metadata-test
-    type: g6-standard-2
+    label_prefix: go-metadata-test
+    type: g6-standard-1
     region: us-iad
     temp_token_name: go-metadata-dev
     token_duration_seconds: 3600
   tasks:
+    - name: Load the cached runner ID
+      stat:
+        path: '{{ playbook_dir }}/.e2e-runner-id'
+      register: stat_cached_id
+
+    - name: Generate a runner ID if it does not exist
+      block:
+        - copy:
+            dest: '{{ playbook_dir }}/.e2e-runner-id'
+            content: '{{ 999999 | random() }}'
+      when: not stat_cached_id.stat.exists
+
     - set_fact:
         run_id: '{{ ansible_date_time.epoch }}'
         temp_token_name: '{{ temp_token_name }}'
+        ssh_pubkey: '{{ lookup("file", ssh_pubkey_path) }}'
+        runner_id: '{{ lookup("file", playbook_dir ~ "/.e2e-runner-id") }}'
 
     - name: Create a temporary token for the plugin to consume
       linode.cloud.token:
@@ -26,15 +40,20 @@
 
     - name: Ensure the test instance is created
       linode.cloud.instance:
-        label: "{{ label }}"
+        label: "{{ label_prefix }}-{{ runner_id }}"
         type: "{{ type }}"
         region: "{{ region }}"
-        image: linode/ubuntu22.04
+        image: linode/ubuntu23.10
         booted: true
+<<<<<<< Updated upstream
         authorized_keys:
           - "{{ lookup('file', ssh_pubkey_path) }}"
         metadata:
           user_data: foobar
+=======
+        metadata:
+          user_data: '{{ lookup("template", playbook_dir ~ "/harden.yaml.j2") }}'
+>>>>>>> Stashed changes
         state: present
       register: create_inst
 
@@ -46,34 +65,49 @@
         hostname: "test-runner"
         ansible_host: "{{ create_inst.instance.ipv4[0] }}"
         groups: test_runner
-        ansible_user: root
+        ansible_user: linodedx
+        ansible_ssh_retries: 50
         temp_token: "{{ temp_token.token.token }}"
         run_id: "{{ run_id }}"
 
 - name: Configure the test instance
   hosts: test_runner
-  remote_user: root
+  remote_user: linodedx
   gather_facts: no
   vars:
     debug: 0
+  pre_tasks:
+    # Wait for SSH to be available under the newly created user
+    - setup:
+      register: setup_status
+      until: setup_status is success
+      delay: 3
+      retries: 30
   tasks:
     - block:
+        - name: Wait for cloud-init to finish initialization
+          command: cloud-init status
+          retries: 30
+          delay: 5
+          register: cloud_init_status
+          until: cloud_init_status.rc == 0
+
         - name: Update repositories and install necessary packages
+          become: yes
           apt:
             name: golang,make
-            update_cache: true
 
         - name: Copy the local project to the remote
           synchronize:
             src: ../../
-            dest: "/go-metadata-{{ run_id }}"
+            dest: "~/go-metadata-{{ run_id }}"
             rsync_opts:
               - "--exclude=.git"
               - "--exclude=venv"
 
         - name: Write the configuration to an env file
           copy:
-            dest: "/go-metadata-{{ run_id }}/.test.env"
+            dest: "~/go-metadata-{{ run_id }}/.test.env"
             content: |
               export LINODE_DEBUG={{ debug }}
               export LINODE_TOKEN={{ temp_token }}
@@ -83,7 +117,7 @@
           args:
             executable: /bin/bash
           shell: |
-            cd /go-metadata-{{ run_id }} && \
+            cd ~/go-metadata-{{ run_id }} && \
             source .test.env && \
             make e2e-local
           register: run_tests
