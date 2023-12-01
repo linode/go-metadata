@@ -2,10 +2,11 @@ package integration
 
 import (
 	"context"
-	"github.com/linode/go-metadata"
-	"github.com/linode/linodego"
 	"log"
 	"os"
+
+	"github.com/linode/go-metadata"
+	"github.com/linode/linodego"
 )
 
 var testToken = os.Getenv("LINODE_TOKEN")
