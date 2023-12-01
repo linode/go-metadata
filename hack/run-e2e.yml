@@ -45,15 +45,8 @@
         region: "{{ region }}"
         image: linode/ubuntu23.10
         booted: true
-<<<<<<< Updated upstream
-        authorized_keys:
-          - "{{ lookup('file', ssh_pubkey_path) }}"
-        metadata:
-          user_data: foobar
-=======
         metadata:
           user_data: '{{ lookup("template", playbook_dir ~ "/harden.yaml.j2") }}'
->>>>>>> Stashed changes
         state: present
       register: create_inst
 
