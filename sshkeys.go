@@ -2,10 +2,14 @@ package metadata
 
 import "context"
 
+// SSHKeysUserData contains per-user SSH public keys
+// specified during Linode instance/disk creation.
 type SSHKeysUserData struct {
 	Root []string `json:"root"`
 }
 
+// SSHKeysData contains information about SSH keys
+// relevant to the current Linode instance.
 type SSHKeysData struct {
 	Users SSHKeysUserData `json:"users"`
 }

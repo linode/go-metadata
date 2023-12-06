@@ -17,6 +17,7 @@ const APIHost = "169.254.169.254"
 const APIProto = "http"
 const APIVersion = "v1"
 
+// Client represents an instance of a Linode Metadata Service client.
 type Client struct {
 	managedTokenExpiry time.Time
 	resty              *resty.Client
