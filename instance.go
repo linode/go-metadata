@@ -2,11 +2,15 @@ package metadata
 
 import "context"
 
+// InstanceBackupsData contains information about
+// the current Linode instance's backups enrollment.
 type InstanceBackupsData struct {
 	Enabled bool    `json:"enabled"`
 	Status  *string `json:"status"`
 }
 
+// InstanceSpecsData contains various information about
+// the specifications of the current Linode instance.
 type InstanceSpecsData struct {
 	VCPUs    int `json:"vcpus"`
 	Memory   int `json:"memory"`
@@ -15,6 +19,7 @@ type InstanceSpecsData struct {
 	Disk     int `json:"disk"`
 }
 
+// InstanceData contains various metadata about the current Linode instance.
 type InstanceData struct {
 	ID       int                 `json:"id"`
 	Label    string              `json:"label"`

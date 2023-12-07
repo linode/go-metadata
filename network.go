@@ -30,6 +30,7 @@ type NetworkData struct {
 	IPv6       IPv6Data        `json:"ipv6"`
 }
 
+// GetNetwork gets networking information about the current Linode instance.
 func (c *Client) GetNetwork(ctx context.Context) (*NetworkData, error) {
 	req := c.R(ctx).SetResult(&NetworkData{})
 

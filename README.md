@@ -1,5 +1,8 @@
 # Linode Metadata Service Client for Go
 
+[![Release](https://img.shields.io/github/v/release/linode/go-metadata)](https://github.com/linode/go-metadata/releases/latest)
+[![GoDoc](https://godoc.org/github.com/linode/go-metadata?status.svg)](https://godoc.org/github.com/linode/go-metadata)
+
 This package allows Go projects to easily interact with the [Linode Metadata Service](https://www.linode.com/docs/products/compute/compute-instances/guides/metadata/?tabs=linode-api).
 
 ## Getting Started
