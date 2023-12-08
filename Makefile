@@ -4,6 +4,25 @@ LINODE_DEBUG ?= 0
 # The path to the pubkey to configure the E2E testing instance with.
 TEST_PUBKEY ?= ~/.ssh/id_rsa.pub
 
+SKIP_LINT         ?= 0
+SKIP_DOCKER       ?= 0
+
+GOLANGCILINT      := golangci-lint
+GOLANGCILINT_IMG  := golangci/golangci-lint:latest
+GOLANGCILINT_ARGS := run
+
+lint:
+ifeq ($(SKIP_LINT), 1)
+	@echo Skipping lint stage
+else ifeq ($(SKIP_DOCKER), 1)
+	$(GOLANGCILINT) $(GOLANGCILINT_ARGS)
+else
+	docker run --rm -v $(shell pwd):/app -w /app $(GOLANGCILINT_IMG) $(GOLANGCILINT) $(GOLANGCILINT_ARGS)
+endif
+
+fix-lint:
+	$(GOLANGCILINT) $(GOLANGCILINT_ARGS) --fix
+
 # Installs dependencies required to run the remote E2E suite.
 test-deps:
 	pip3 install --upgrade ansible -r https://raw.githubusercontent.com/linode/ansible_linode/main/requirements.txt
