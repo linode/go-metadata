@@ -20,7 +20,10 @@ else
 	docker run --rm -v $(shell pwd):/app -w /app $(GOLANGCILINT_IMG) $(GOLANGCILINT) $(GOLANGCILINT_ARGS)
 endif
 
-fix-lint:
+fmt:
+	gofumpt -w -l .
+
+fix-lint: fmt
 	$(GOLANGCILINT) $(GOLANGCILINT_ARGS) --fix
 
 # Installs dependencies required to run the remote E2E suite.
