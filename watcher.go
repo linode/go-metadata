@@ -22,6 +22,9 @@ func (watcher *NetworkWatcher) Start(ctx context.Context) {
 		var oldNetworkData *NetworkData
 		watcher.ticker = time.NewTicker(watcher.interval)
 		defer watcher.ticker.Stop()
+		defer close(watcher.cancel)
+		defer close(watcher.Errors)
+		defer close(watcher.Updates)
 
 		for {
 			select {
@@ -43,12 +46,8 @@ func (watcher *NetworkWatcher) Start(ctx context.Context) {
 	}()
 }
 
-func (watcher *NetworkWatcher) Close() error {
-	close(watcher.cancel)
-	close(watcher.Errors)
-	close(watcher.Updates)
+func (watcher *NetworkWatcher) Close() {
 	watcher.ticker.Stop()
-	return nil
 }
 
 type InstanceWatcher struct {
@@ -65,6 +64,9 @@ func (watcher *InstanceWatcher) Start(ctx context.Context) {
 		var oldInstanceData *InstanceData
 		watcher.ticker = time.NewTicker(watcher.interval)
 		defer watcher.ticker.Stop()
+		defer close(watcher.cancel)
+		defer close(watcher.Errors)
+		defer close(watcher.Updates)
 
 		for {
 			select {
@@ -86,12 +88,8 @@ func (watcher *InstanceWatcher) Start(ctx context.Context) {
 	}()
 }
 
-func (watcher *InstanceWatcher) Close() error {
-	close(watcher.cancel)
-	close(watcher.Errors)
-	close(watcher.Updates)
+func (watcher *InstanceWatcher) Close() {
 	watcher.ticker.Stop()
-	return nil
 }
 
 type WatcherOption func(options *watcherConfig)
