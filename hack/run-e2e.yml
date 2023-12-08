@@ -2,9 +2,10 @@
 - name: Deploy Test Linode
   hosts: localhost
   vars:
+    cleanup_linode: false
     ssh_pubkey_path: ~/.ssh/id_rsa.pub
     label_prefix: go-metadata-test
-    type: g6-standard-1
+    type: g6-nanode-1
     region: us-iad
     temp_token_name: go-metadata-dev
     token_duration_seconds: 3600
@@ -23,7 +24,9 @@
 
     - set_fact:
         run_id: '{{ ansible_date_time.epoch }}'
+        label_prefix: "{{ label_prefix }}"
         temp_token_name: '{{ temp_token_name }}'
+        cleanup_linode: "{{ cleanup_linode }}"
         ssh_pubkey: '{{ lookup("file", ssh_pubkey_path) }}'
         runner_id: '{{ lookup("file", playbook_dir ~ "/.e2e-runner-id") }}'
 
@@ -122,13 +125,21 @@
 - name: Clean up
   hosts: localhost
   gather_facts: no
+  
   tasks:
     - name: Remove the temp token
       linode.cloud.token:
         label: "{{ temp_token_name }}-{{ run_id }}"
         state: absent
 
+    - name: Cleanup Linode instance
+      when: cleanup_linode
+      linode.cloud.instance:
+        label: "{{ label_prefix }}-{{ runner_id }}"
+        state: absent
+
     - name: Exit if tests failed
       assert:
         that:
           - "'ansible_failed_result' not in hostvars['test-runner']"
+    
