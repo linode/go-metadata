@@ -56,7 +56,7 @@ func TestNetworkWatcher(t *testing.T) {
 	assert.NoError(t, err)
 
 	watcher := metadataClient.NewNetworkWatcher(metadata.WatcherWithInterval(1 * time.Second))
-	watcher.Start(ctx)
+	go watcher.Start(ctx)
 	numUpdates := 0
 	for i := 1; i <= 5; i++ {
 		updateData := <-watcher.Updates
@@ -116,7 +116,7 @@ func TestInstanceWatcher(t *testing.T) {
 	assert.NoError(t, err)
 
 	watcher := metadataClient.NewInstanceWatcher(metadata.WatcherWithInterval(1 * time.Second))
-	watcher.Start(ctx)
+	go watcher.Start(ctx)
 	numUpdates := 0
 	for i := 1; i <= 5; i++ {
 		updateData := <-watcher.Updates
