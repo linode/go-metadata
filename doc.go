@@ -28,6 +28,8 @@ Basic example:
 		fmt.Println("Instance Label:", instanceInfo.Label)
 	}
 
+For more examples see: https://github.com/linode/go-metadata/tree/ref/watcher-refactor/examples
+
 To learn more about the Linode Metadata Service, see the official guide: https://www.linode.com/docs/products/compute/compute-instances/guides/metadata/?tabs=linode-api
 */
 
