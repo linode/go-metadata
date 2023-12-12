@@ -1,7 +1,11 @@
 name: E2E Tests
 
 on:
-  workflow_dispatch: null
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'The hash value of the commit.'
+        required: true
   push:
     branches:
       - main
@@ -13,6 +17,13 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
+        if: ${{ inputs.commit_sha != '' }}
+        with:
+          ref: ${{ inputs.commit_sha }}
+
+      - name: checkout repo
+        uses: actions/checkout@v4
+        if: ${{ inputs.commit_sha == '' }}
 
       - name: update packages
         run: sudo apt-get update -y
