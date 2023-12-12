@@ -24,3 +24,4 @@ linters:
   enable:
     - gofumpt
     - goimports
+    - gosec
