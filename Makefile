@@ -4,7 +4,6 @@ LINODE_DEBUG ?= 0
 # The path to the pubkey to configure the E2E testing instance with.
 TEST_PUBKEY ?= ~/.ssh/id_rsa.pub
 
-SKIP_LINT         ?= 0
 SKIP_DOCKER       ?= 0
 
 GOLANGCILINT      := golangci-lint
