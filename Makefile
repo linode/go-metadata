@@ -11,6 +11,9 @@ GOLANGCILINT      := golangci-lint
 GOLANGCILINT_IMG  := golangci/golangci-lint:latest
 GOLANGCILINT_ARGS := run
 
+# Whether to cleanup the Linode instance used in the testing
+CLEANUP_TEST_LINODE_INSTANCE ?= false
+
 lint:
 ifeq ($(SKIP_DOCKER), 1)
 	$(GOLANGCILINT) $(GOLANGCILINT_ARGS)
@@ -31,7 +34,7 @@ test-deps:
 
 # Runs the E2E test suite on a host provisioned by Ansible.
 e2e:
-	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -v --extra-vars="debug=${LINODE_DEBUG} ssh_pubkey_path=${TEST_PUBKEY}" ./hack/run-e2e.yml
+	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -v --extra-vars="debug=${LINODE_DEBUG} ssh_pubkey_path=${TEST_PUBKEY} cleanup_linode=${CLEANUP_TEST_LINODE_INSTANCE}" ./hack/run-e2e.yml
 
 # Runs the E2E test suite locally.
 # NOTE: E2E tests must be run from within a Linode.
