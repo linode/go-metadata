@@ -12,9 +12,7 @@ GOLANGCILINT_IMG  := golangci/golangci-lint:latest
 GOLANGCILINT_ARGS := run
 
 lint:
-ifeq ($(SKIP_LINT), 1)
-	@echo Skipping lint stage
-else ifeq ($(SKIP_DOCKER), 1)
+ifeq ($(SKIP_DOCKER), 1)
 	$(GOLANGCILINT) $(GOLANGCILINT_ARGS)
 else
 	docker run --rm -v $(shell pwd):/app -w /app $(GOLANGCILINT_IMG) $(GOLANGCILINT) $(GOLANGCILINT_ARGS)
