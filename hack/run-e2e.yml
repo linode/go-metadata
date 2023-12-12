@@ -133,7 +133,7 @@
         state: absent
 
     - name: Cleanup Linode instance
-      when: cleanup_linode
+      when: cleanup_linode|bool
       linode.cloud.instance:
         label: "{{ label_prefix }}-{{ runner_id }}"
         state: absent
