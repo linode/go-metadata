@@ -92,6 +92,8 @@ func main() {
 }
 ```
 
+For more examples, visit the [examples directory](./examples).
+
 ## Documentation
 
 See [godoc](https://pkg.go.dev/github.com/linode/go-metadata) for a complete documentation reference.
