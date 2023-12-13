@@ -1,0 +1,27 @@
+run:
+  tests: false
+  timeout: 10m
+
+linters-settings:
+  revive:
+    rules:
+      - name: unused-parameter
+        severity: warning
+        disabled: true
+
+  gomoddirectives:
+    replace-allow-list:
+      - github.com/linode/linodego
+
+  govet:
+    disable:
+      - shadow
+  dupl:
+    threshold: 100
+
+linters:
+  fast: false
+  enable:
+    - gofumpt
+    - goimports
+    - gosec
