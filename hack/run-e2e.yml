@@ -86,7 +86,7 @@
           retries: 30
           delay: 5
           register: cloud_init_status
-          until: (cloud_init_status.stdout | from_json)["status"] == "done"
+          until: cloud_init_status.rc == 0 and (cloud_init_status.stdout | from_json)["status"] == "done"
 
         - name: Update repositories and install necessary packages
           become: yes
