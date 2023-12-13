@@ -13,9 +13,11 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const APIHost = "169.254.169.254"
-const APIProto = "http"
-const APIVersion = "v1"
+const (
+	APIHost    = "169.254.169.254"
+	APIProto   = "http"
+	APIVersion = "v1"
+)
 
 // Client represents an instance of a Linode Metadata Service client.
 type Client struct {
@@ -79,7 +81,6 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	}
 
 	result.updateHostURL()
-
 	result.setUserAgent(userAgent)
 
 	if clientOpts.ManagedToken && clientOpts.StartingToken == "" {
@@ -137,7 +138,7 @@ func (c *Client) updateHostURL() {
 }
 
 // middlewareTokenRefresh handles automatically refreshing managed tokens.
-func (c *Client) middlewareTokenRefresh(rc *resty.Client, r *resty.Request) error {
+func (c *Client) middlewareTokenRefresh(_ *resty.Client, r *resty.Request) error {
 	// Don't run this middleware when generating tokens
 	if r.URL == "token" {
 		return nil
