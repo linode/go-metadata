@@ -31,6 +31,7 @@
         runner_id: '{{ lookup("file", playbook_dir ~ "/.e2e-runner-id") }}'
 
     - name: Create a temporary token for the plugin to consume
+      no_log: true
       linode.cloud.token:
         label: "{{ temp_token_name }}-{{ run_id }}"
         scopes: "events:read_write linodes:read_write"
@@ -42,6 +43,7 @@
       register: temp_token
 
     - name: Ensure the test instance is created
+      no_log: true
       linode.cloud.instance:
         label: "{{ label_prefix }}-{{ runner_id }}"
         type: "{{ type }}"
@@ -57,6 +59,7 @@
       wait_for: host="{{ create_inst.instance.ipv4[0] }}" port=22 delay=1  timeout=300
 
     - name: Append host to the in-memory inventory
+      no_log: true
       add_host:
         hostname: "test-runner"
         ansible_host: "{{ create_inst.instance.ipv4[0] }}"
@@ -128,6 +131,7 @@
   
   tasks:
     - name: Remove the temp token
+      no_log: true
       linode.cloud.token:
         label: "{{ temp_token_name }}-{{ run_id }}"
         state: absent
