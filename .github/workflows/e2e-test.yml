@@ -1,0 +1,49 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'The hash value of the commit.'
+        required: true
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        if: ${{ inputs.commit_sha != '' }}
+        with:
+          ref: ${{ inputs.commit_sha }}
+
+      - name: checkout repo
+        uses: actions/checkout@v4
+        if: ${{ inputs.commit_sha == '' }}
+
+      - name: update packages
+        run: sudo apt-get update -y
+
+      - name: setup python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: install or update Python build system
+        run: python3 -m pip install -U wheel setuptools certifi pip
+    
+      - name: install test dependencies
+        run: make test-deps
+
+      - name: generate local SSH key
+        run: ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+
+      - name: run e2e test
+        run: make e2e
+        env:
+          CLEANUP_TEST_LINODE_INSTANCE: true
+          LINODE_TOKEN: ${{ secrets.DX_LINODE_TOKEN }}
