@@ -2,9 +2,10 @@ package metadata
 
 import (
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"net/http"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
 )
 
 // APIError is the error-set returned by the Linode API when presented with an invalid request
