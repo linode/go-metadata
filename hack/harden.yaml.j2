@@ -19,6 +19,13 @@ users:
     ssh_authorized_keys:
       - '{{ ssh_pubkey }}'
 
+write_files:
+  # Root login over SSH isn't fully disabled by disable_root
+  - path: /etc/ssh/sshd_config.d/51-disable-root.conf
+    permissions: "0600"
+    content: |
+      PermitRootLogin no
+
 runcmd:
   - service ssh restart
   - service fail2ban start --enable
