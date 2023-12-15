@@ -20,7 +20,7 @@ go get github.com/linode/go-metadata
 
 ### Basic Example
 
-The follow sample shows a simple Go project that initializes a new metadata client and retrieves various information
+The following sample shows a simple Go project that initializes a new metadata client and retrieves various information
 about the current Linode.
 
 ```go
