@@ -2,10 +2,11 @@ package integration
 
 import (
 	"context"
-	"github.com/linode/go-metadata"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/linode/go-metadata"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClient_UnmanagedTokenExpired(t *testing.T) {

@@ -9,9 +9,11 @@ import (
 	"github.com/linode/linodego"
 )
 
-var testToken = os.Getenv("LINODE_TOKEN")
-var metadataClient *metadata.Client
-var linodeClient *linodego.Client
+var (
+	testToken      = os.Getenv("LINODE_TOKEN")
+	metadataClient *metadata.Client
+	linodeClient   *linodego.Client
+)
 
 func init() {
 	if testToken == "" {
