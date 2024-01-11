@@ -2,10 +2,11 @@ package integration
 
 import (
 	"context"
-	"github.com/linode/go-metadata"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/linode/go-metadata"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClient_UnmanagedTokenExpired(t *testing.T) {
@@ -41,4 +42,25 @@ func TestClient_ManagedTokenRefresh(t *testing.T) {
 	// Token should have automatically refreshed
 	_, err = mdClient.GetInstance(context.Background())
 	assert.NoError(t, err)
+}
+
+func TestClient_DebugLogs(t *testing.T) {
+	var logger testLogger
+
+	mdClient, err := metadata.NewClient(
+		context.Background(),
+		metadata.ClientWithDebug(),
+		metadata.ClientWithLogger(&logger),
+	)
+	assert.NoError(t, err)
+
+	_, err = mdClient.GetInstance(context.Background())
+	assert.NoError(t, err)
+
+	debugOutput := logger.Data.String()
+
+	// Validate a few arbitrary bits of the debug output
+	assert.Contains(t, debugOutput, "User-Agent: go-metadata")
+	assert.Contains(t, debugOutput, "/v1/token")
+	assert.Contains(t, debugOutput, "/v1/instance")
 }
