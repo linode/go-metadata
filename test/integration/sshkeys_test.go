@@ -15,7 +15,7 @@ func TestGetSSHKeys(t *testing.T) {
 
 	if len(sshKeys.Users) < 1 {
 		t.Skip(
-			"The current instance does not have any any SSH keys configured, skipping...")
+			"The current instance does not have any SSH keys configured, skipping...")
 	}
 
 	for _, v := range sshKeys.Users {
