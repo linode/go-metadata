@@ -39,3 +39,6 @@ e2e:
 # NOTE: E2E tests must be run from within a Linode.
 e2e-local:
 	cd test/integration && make e2e-local
+
+unit-test:
+	go test -v ./
