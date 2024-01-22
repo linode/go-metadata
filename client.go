@@ -19,6 +19,8 @@ const (
 	APIVersion = "v1"
 )
 
+type Logger = resty.Logger
+
 // Client represents an instance of a Linode Metadata Service client.
 type Client struct {
 	managedTokenExpiry time.Time
@@ -89,6 +91,11 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		}
 	} else if clientOpts.StartingToken != "" {
 		result.UseToken(clientOpts.StartingToken)
+	}
+
+	result.resty.SetDebug(clientOpts.Debug)
+	if clientOpts.DebugLogger != nil {
+		result.resty.SetLogger(clientOpts.DebugLogger)
 	}
 
 	result.resty.OnBeforeRequest(result.middlewareTokenRefresh)
@@ -184,6 +191,9 @@ type clientCreateConfig struct {
 	ManagedTokenOpts []TokenOption
 
 	StartingToken string
+
+	Debug       bool
+	DebugLogger Logger
 }
 
 // ClientOption is an option that can be used
@@ -250,5 +260,26 @@ func ClientWithoutManagedToken() ClientOption {
 func ClientWithToken(token string) ClientOption {
 	return func(options *clientCreateConfig) {
 		options.StartingToken = token
+	}
+}
+
+// ClientWithDebug enables debug mode for the metadata client.
+// If this option is specified, all metadata service API requests
+// and responses will be written to the client logger (default: stderr).
+//
+// To override the client logger, refer to ClientWithLogger.
+func ClientWithDebug() ClientOption {
+	return func(options *clientCreateConfig) {
+		options.Debug = true
+	}
+}
+
+// ClientWithLogger specifies the logger that should be used
+// when outputting debug logs. The logger argument should implement
+// the Logger interface.
+// Default: stderr
+func ClientWithLogger(logger Logger) ClientOption {
+	return func(options *clientCreateConfig) {
+		options.DebugLogger = logger
 	}
 }

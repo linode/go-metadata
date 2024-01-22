@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	metadata "github.com/linode/go-metadata"
 	"log"
 	"time"
+
+	metadata "github.com/linode/go-metadata"
 )
 
 func main() {
