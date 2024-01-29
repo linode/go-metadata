@@ -8,7 +8,7 @@ go 1.20
 require (
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/linode/go-metadata v0.0.0
-	github.com/linode/linodego v1.27.1
+	github.com/linode/linodego v1.28.0
 	github.com/stretchr/testify v1.8.4
 )
 
