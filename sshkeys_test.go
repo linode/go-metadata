@@ -24,8 +24,8 @@ func TestGetSSHKeys_Success(t *testing.T) {
 	// Create a mock client with a successful response
 	mockClient := &SshkeysMockclient{
 		Resp: &SSHKeysData{
-			Users: SSHKeysUserData{
-				Root: []string{"ssh-randomkeyforunittestas;ldkjfqweeru", "ssh-randomkeyforunittestas;ldkjfqweerutwo"},
+			Users: map[string][]string{
+				"Root": {"ssh-randomkeyforunittestas;ldkjfqweeru", "ssh-randomkeyforunittestas;ldkjfqweerutwo"},
 			},
 		},
 	}
@@ -34,7 +34,7 @@ func TestGetSSHKeys_Success(t *testing.T) {
 
 	assert.NoError(t, err, "Expected no error")
 	assert.NotNil(t, sshKeys, "Expected non-nil SSHKeysData")
-	assert.Len(t, sshKeys.Users.Root, 2, "Unexpected number of root SSH keys")
+	assert.Len(t, sshKeys.Users["Root"], 2, "Unexpected number of root SSH keys")
 }
 
 func TestGetSSHKeys_Error(t *testing.T) {
