@@ -120,13 +120,26 @@
             source .test.env && \
             make e2e-local
           register: run_tests
+                
+        - name: Find report.xml file on remote server
+          find:
+            paths: "~/py-metadata-{{ run_id }}"
+            patterns: "*_py_metadata_test_report.xml"
+            file_type: file
+          register: report_files
+
+        - name: Extract filename from the found files
+          set_fact:
+            filename: "{{ report_files.files | first | default({}) }}"
+          when: report_files.files | length > 0
 
         - name: Copy report.xml to local folder directory
           fetch:
-            src: "~/go-metadata-{{ run_id }}/{{ report_filename }}"
+            src: "{{ filename.path }}"
             dest: "./"
             flat: yes
             remote_src: yes
+            ignore_errors: yes
 
       rescue:
         - debug:
