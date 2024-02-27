@@ -123,7 +123,7 @@
 
         - name: Copy report.xml to local folder directory
           fetch:
-            src: "~/go-metadata-{{ run_id }}/report.xml"
+            src: "~/go-metadata-{{ run_id }}/{{ report_filename }}"
             dest: "./"
             flat: yes
             remote_src: yes
