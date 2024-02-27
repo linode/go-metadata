@@ -20,10 +20,15 @@ jobs:
         if: ${{ inputs.commit_sha != '' }}
         with:
           ref: ${{ inputs.commit_sha }}
+          fetch-depth: 0
+          submodules: 'recursive'
 
       - name: checkout repo
         uses: actions/checkout@v4
         if: ${{ inputs.commit_sha == '' }}
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
 
       - name: update packages
         run: sudo apt-get update -y
@@ -41,9 +46,50 @@ jobs:
 
       - name: generate local SSH key
         run: ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+      
+      - name: Install Python deps
+        run: pip3 install requests wheel boto3
+
+      - name: Install go-junit-report
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
 
       - name: run e2e test
-        run: make e2e
+        run: |
+          status=0
+          if ! make e2e > test_output.txt; then
+            echo "EXIT_STATUS=1" >> $GITHUB_ENV
+          fi
+            cat test_output.txt
         env:
           CLEANUP_TEST_LINODE_INSTANCE: true
           LINODE_TOKEN: ${{ secrets.DX_LINODE_TOKEN }}
+
+      - name: Copy report.xml from hack directory to root directory
+        run: |
+            cp hack/report.xml report.xml
+
+      - name: Add additional information to XML report
+        run: |
+          filename=$(ls | grep -E 'report\.xml$')
+          python tod_scripts/add_to_xml_test_report.py \
+          --branch_name "${GITHUB_REF#refs/*/}" \
+          --gha_run_id "$GITHUB_RUN_ID" \
+          --gha_run_number "$GITHUB_RUN_NUMBER" \
+          --xmlfile "${filename}"
+
+      - name: Upload test results
+        run: |
+          filename=$(ls | grep -E 'result\.xml$')
+          python tod_scripts/test_report_upload_script.py "${filename}"
+        env:
+         LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
+         LINODE_CLI_OBJ_SECRET_KEY: ${{ secrets.LINODE_CLI_OBJ_SECRET_KEY }}
+
+      - name: Test Execution Status Handler
+        run: |
+          if [[ "$EXIT_STATUS" != 0 ]]; then
+              echo "Test execution contains failure(s)"
+              exit $EXIT_STATUS 
+          else
+              echo "Tests passed!"
+          fi
