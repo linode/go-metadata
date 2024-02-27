@@ -64,10 +64,6 @@ jobs:
           CLEANUP_TEST_LINODE_INSTANCE: true
           LINODE_TOKEN: ${{ secrets.DX_LINODE_TOKEN }}
 
-      - name: Copy report.xml from hack directory to root directory
-        run: |
-            cp hack/report.xml report.xml
-
       - name: Add additional information to XML report
         run: |
           filename=$(ls | grep -E 'report\.xml$')
@@ -75,7 +71,7 @@ jobs:
           --branch_name "${GITHUB_REF#refs/*/}" \
           --gha_run_id "$GITHUB_RUN_ID" \
           --gha_run_number "$GITHUB_RUN_NUMBER" \
-          --xmlfile "${filename}"
+          --xmlfile "hack/${filename}"
 
       - name: Upload test results
         run: |
