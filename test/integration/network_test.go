@@ -47,5 +47,5 @@ func TestGetNetwork(t *testing.T) {
 
 	assert.True(t, isValidIPv6(ipv6Slaac.String()))
 	assert.True(t, isValidIPv6(ipv6LinkLocal.String()))
-	assert.Contains(t, "fe80", ipv6LinkLocal.String())
+	assert.Contains(t, ipv6LinkLocal.String(), "fe80")
 }
