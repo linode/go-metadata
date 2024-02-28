@@ -123,8 +123,8 @@
                 
         - name: Find report.xml file on remote server
           find:
-            paths: "~/py-metadata-{{ run_id }}"
-            patterns: "*_py_metadata_test_report.xml"
+            paths: "~/go-metadata-{{ run_id }}"
+            patterns: "*_go_metadata_test_report.xml"
             file_type: file
           register: report_files
 

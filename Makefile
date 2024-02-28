@@ -35,6 +35,10 @@ test-deps:
 e2e:
 	ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -v --extra-vars="debug=${LINODE_DEBUG} ssh_pubkey_path=${TEST_PUBKEY} cleanup_linode=${CLEANUP_TEST_LINODE_INSTANCE}" ./hack/run-e2e.yml
 
+# Define the timestamp and dynamic report filename
+timestamp := $(shell date +'%Y%m%d%H%M')
+export report_filename := $(timestamp)_go_metadata_test_report.xml
+
 # Runs the E2E test suite locally.
 # NOTE: E2E tests must be run from within a Linode.
 e2e-local:
