@@ -37,7 +37,7 @@ e2e:
 
 # Define the timestamp and dynamic report filename
 timestamp := $(shell date +'%Y%m%d%H%M')
-export report_filename := $(timestamp)_go_metadata_test_report.xml
+export REPORT_FILENAME := $(timestamp)_go_metadata_test_report.xml
 
 # Runs the E2E test suite locally.
 # NOTE: E2E tests must be run from within a Linode.

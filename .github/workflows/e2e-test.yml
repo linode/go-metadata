@@ -55,11 +55,9 @@ jobs:
 
       - name: run e2e test
         run: |
-          status=0
-          if ! make e2e > test_output.txt; then
+          if ! make e2e ; then
             echo "EXIT_STATUS=1" >> $GITHUB_ENV
           fi
-            cat test_output.txt
         env:
           CLEANUP_TEST_LINODE_INSTANCE: true
           LINODE_TOKEN: ${{ secrets.DX_LINODE_TOKEN }}
