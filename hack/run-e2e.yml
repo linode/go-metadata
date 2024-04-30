@@ -48,7 +48,7 @@
         label: "{{ label_prefix }}-{{ runner_id }}"
         type: "{{ type }}"
         region: "{{ region }}"
-        image: linode/ubuntu23.10
+        image: linode/ubuntu24.04
         booted: true
         metadata:
           user_data: '{{ lookup("template", playbook_dir ~ "/harden.yaml.j2") }}'
@@ -95,6 +95,12 @@
           become: yes
           apt:
             name: golang,make
+        
+        - name: Install go-junit-report
+          args:
+            executable: /bin/bash
+          shell: |
+            go install github.com/jstemmer/go-junit-report/v2@14d61e6e75e3f3c74551d757ad936e8e88014464
 
         - name: Copy the local project to the remote
           synchronize:
@@ -116,6 +122,7 @@
           args:
             executable: /bin/bash
           shell: |
+            export PATH="$HOME/go/bin:$PATH" && \
             cd ~/go-metadata-{{ run_id }} && \
             source .test.env && \
             make e2e-local
@@ -123,14 +130,19 @@
                 
         - name: Find report.xml file on remote server
           find:
-            paths: "~/go-metadata-{{ run_id }}"
+            paths: "~/go-metadata-{{ run_id }}/test/integration"
             patterns: "*_go_metadata_test_report.xml"
             file_type: file
           register: report_files
 
+        - name: Extract filename from the found files
+          set_fact:
+            filename: "{{ report_files.files | first | default({}) }}"
+          when: report_files.files | length > 0
+
         - name: Copy report.xml to local folder directory
           fetch:
-            src: "{{ report_files.files | first | default({}).path }}"
+            src: "{{ filename.path }}"
             dest: "./"
             flat: yes
             remote_src: yes
