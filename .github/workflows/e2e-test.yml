@@ -50,9 +50,6 @@ jobs:
       - name: Install Python deps
         run: pip3 install requests wheel boto3
 
-      - name: Install go-junit-report
-        run: go install github.com/jstemmer/go-junit-report/v2@latest
-
       - name: run e2e test
         run: |
           make e2e
@@ -63,14 +60,17 @@ jobs:
       - name: Upload test results
         if: always()
         run: |
+          ls -l hack/
           cp hack/*_go_metadata_test_report.xml .
           filename=$(ls | grep -E '^[0-9]{12}_go_metadata_test_report\.xml$')
+          cat $filename
           python tod_scripts/add_to_xml_test_report.py \
           --branch_name "${GITHUB_REF#refs/*/}" \
           --gha_run_id "$GITHUB_RUN_ID" \
           --gha_run_number "$GITHUB_RUN_NUMBER" \
           --xmlfile "${filename}"
           sync
+          cat $filename
           python tod_scripts/test_report_upload_script.py "${filename}"
         env:
          LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
