@@ -23,13 +23,6 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
-      - name: checkout repo
-        uses: actions/checkout@v4
-        if: ${{ inputs.commit_sha == '' }}
-        with:
-          fetch-depth: 0
-          submodules: 'recursive'
-
       - name: update packages
         run: sudo apt-get update -y
 
