@@ -53,10 +53,8 @@ jobs:
       - name: Upload test results
         if: always()
         run: |
-          ls -l hack/
           cp hack/*_go_metadata_test_report.xml .
           filename=$(ls | grep -E '^[0-9]{12}_go_metadata_test_report\.xml$')
-          cat $filename
           python tod_scripts/add_to_xml_test_report.py \
           --branch_name "${GITHUB_REF#refs/*/}" \
           --gha_run_id "$GITHUB_RUN_ID" \
