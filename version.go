@@ -23,8 +23,9 @@ func init() {
 			if dep.Path == packagePath {
 				if dep.Replace != nil {
 					Version = dep.Replace.Version
+				} else {
+					Version = dep.Version
 				}
-				Version = dep.Version
 				break
 			}
 		}
