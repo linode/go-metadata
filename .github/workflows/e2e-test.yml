@@ -17,23 +17,19 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
-        if: ${{ inputs.commit_sha != '' }}
         with:
           ref: ${{ inputs.commit_sha }}
           fetch-depth: 0
           submodules: 'recursive'
 
-      - name: update packages
-        run: sudo apt-get update -y
-
       - name: setup python 3
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: install or update Python build system
         run: python3 -m pip install -U wheel setuptools certifi pip
-    
+
       - name: install test dependencies
         run: make test-deps
 
