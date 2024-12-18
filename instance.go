@@ -37,7 +37,7 @@ type InstanceData struct {
 	Specs        InstanceSpecsData   `json:"specs"`
 	Backups      InstanceBackupsData `json:"backups"`
 	Image        InstanceImageData   `json:"image"`
-	AccountEUIID string              `json:"account_euuid"`
+	AccountEUUID string              `json:"account_euuid"`
 }
 
 // GetInstance gets various information about the current instance.

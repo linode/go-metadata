@@ -46,7 +46,7 @@ func TestGetInstance_Success(t *testing.T) {
 				ID:    "linode/ubuntu24.04",
 				Label: "Ubuntu 24.04 LTS",
 			},
-			AccountEUIID: "ABCD1234-ABCD-1234-ABCD1234ABCD1234",
+			AccountEUUID: "ABCD1234-ABCD-1234-ABCD1234ABCD1234",
 		},
 	}
 
