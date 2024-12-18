@@ -10,12 +10,12 @@ require (
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/linode/go-metadata v0.0.0
 	github.com/linode/linodego v1.43.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-resty/resty/v2 v2.16.0 // indirect
+	github.com/go-resty/resty/v2 v2.16.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
