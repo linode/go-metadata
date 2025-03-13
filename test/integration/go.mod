@@ -3,7 +3,8 @@
 
 module github.com/linode/go-metadata/test/integration
 
-go 1.21
+go 1.23.0
+
 toolchain go1.23.7
 
 require (
@@ -18,7 +19,7 @@ require (
 	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
