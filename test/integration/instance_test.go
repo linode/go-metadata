@@ -22,6 +22,8 @@ func TestGetInstance(t *testing.T) {
 	assert.Equal(t, apiInst.Region, mdInst.Region)
 	assert.Equal(t, apiInst.Type, mdInst.Type)
 	assert.Equal(t, apiInst.Tags, mdInst.Tags)
+	assert.Equal(t, apiInst.Image, mdInst.Image.ID)
+	assert.IsType(t, "", mdInst.AccountEUUID)
 
 	assert.Equal(t, apiInst.Specs.Disk, mdInst.Specs.Disk)
 	assert.Equal(t, apiInst.Specs.Memory, mdInst.Specs.Memory)
