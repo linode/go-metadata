@@ -50,7 +50,9 @@ jobs:
         if: always()
         run: |
           cp hack/*_go_metadata_test_report.xml .
+          ls -ltr 
           filename=$(ls | grep -E '^[0-9]{12}_go_metadata_test_report\.xml$')
+          cat ${filename}
           python3 e2e_scripts/tod_scripts/xml_to_obj_storage/scripts/add_gha_info_to_xml.py \
           --branch_name "${GITHUB_REF#refs/*/}" \
           --gha_run_id "$GITHUB_RUN_ID" \
