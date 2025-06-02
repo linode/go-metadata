@@ -10,7 +10,7 @@ toolchain go1.23.7
 require (
 	github.com/jarcoal/httpmock v1.4.0
 	github.com/linode/go-metadata v0.0.0
-	github.com/linode/linodego v1.51.0
+	github.com/linode/linodego v1.52.0
 	github.com/stretchr/testify v1.10.0
 )
 
