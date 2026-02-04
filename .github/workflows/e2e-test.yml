@@ -47,7 +47,7 @@ jobs:
           LINODE_TOKEN: ${{ secrets.DX_LINODE_TOKEN }}
 
       - name: Upload test results
-        if: always()
+        if: always() && github.event_name == 'push'
         run: |
           cp hack/*_go_metadata_test_report.xml .
           filename=$(ls | grep -E '^[0-9]{12}_go_metadata_test_report\.xml$')
