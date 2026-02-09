@@ -6,6 +6,11 @@ on:
       commit_sha:
         description: 'The hash value of the commit.'
         required: true
+      test_report_upload:
+        description: 'Indicates whether to upload the test report to object storage. Defaults to "false"'
+        type: boolean
+        required: false
+        default: false
   push:
     branches:
       - main
@@ -47,7 +52,7 @@ jobs:
           LINODE_TOKEN: ${{ secrets.DX_LINODE_TOKEN }}
 
       - name: Upload test results
-        if: always() && github.event_name == 'push'
+        if: ${{ always() && github.repository == 'linode/go-metadata' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.test_report_upload)) }}
         run: |
           cp hack/*_go_metadata_test_report.xml .
           filename=$(ls | grep -E '^[0-9]{12}_go_metadata_test_report\.xml$')
