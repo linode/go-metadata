@@ -49,6 +49,8 @@
         type: "{{ type }}"
         region: "{{ region }}"
         image: linode/ubuntu24.04
+        authorized_keys:
+          - "{{ ssh_pubkey }}"
         booted: true
         metadata:
           user_data: '{{ lookup("template", playbook_dir ~ "/harden.yaml.j2") }}'
@@ -188,4 +190,3 @@
       assert:
         that:
           - "'ansible_failed_result' not in hostvars['test-runner']"
-    
