@@ -50,7 +50,7 @@
         region: "{{ region }}"
         image: linode/ubuntu24.04
         authorized_keys:
-          - "{{ ssh_pubkey }}"
+          - "{{ ssh_pubkey | trim }}"
         booted: true
         metadata:
           user_data: '{{ lookup("template", playbook_dir ~ "/harden.yaml.j2") }}'
