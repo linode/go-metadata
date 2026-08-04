@@ -6,7 +6,7 @@ module github.com/linode/go-metadata/test/integration
 go 1.25.0
 
 require (
-	github.com/jarcoal/httpmock v1.4.1
+	github.com/jarcoal/httpmock v1.4.2
 	github.com/linode/go-metadata v0.0.0
 	github.com/linode/linodego v1.69.1
 	github.com/stretchr/testify v1.11.1
