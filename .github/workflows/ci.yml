@@ -46,8 +46,10 @@ jobs:
           go-version: 'stable'
       - run: go version
 
-      - name: Lint
-        run: make lint
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
 
       - name: Vet
         run: go vet ./...

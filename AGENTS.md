@@ -8,7 +8,7 @@
 ## Commands Agents Should Use
 - Unit tests: `make unit-test` or `go test -v ./`
 - Vet: `go vet ./...`
-- Lint: `make lint` (`SKIP_DOCKER=1 make lint` runs local `golangci-lint`; default runs the Docker image)
+- Lint: `make lint` (local `golangci-lint`)
 - Format: `make fmt` (`gofumpt -w -l .`) or `make fix-lint` for formatter plus linter fixes
 - Dependency hygiene: `go mod tidy` followed by checking for a clean diff
 - Remote E2E: `make test-deps` then `make e2e` with `LINODE_TOKEN` and an SSH public key available; this provisions paid Linode infrastructure unless cleanup is enabled.
