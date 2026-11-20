@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func isValidIPv4(ip string) bool {
@@ -34,7 +35,7 @@ func TestGetNetwork(t *testing.T) {
 	t.Parallel()
 
 	mdNet, err := metadataClient.GetNetwork(context.Background())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	ipv4List := mdNet.IPv4.Public
 
@@ -48,4 +49,28 @@ func TestGetNetwork(t *testing.T) {
 	assert.True(t, isValidIPv6(ipv6Slaac.String()))
 	assert.True(t, isValidIPv6(ipv6LinkLocal.String()))
 	assert.Contains(t, ipv6LinkLocal.String(), "fe80")
+
+	for _, ip := range mdNet.IPv4.VPC {
+		assert.NotNil(t, net.ParseIP(ip))
+	}
+	for _, ip := range mdNet.IPv6.VPC {
+		assert.NotNil(t, net.ParseIP(ip))
+	}
+	for _, iface := range mdNet.Interfaces {
+		assert.Positive(t, iface.ID)
+		if iface.VPC == nil {
+			continue
+		}
+
+		assert.Positive(t, iface.VPC.ID)
+		assert.Positive(t, iface.VPC.Subnet.ID)
+		if iface.VPC.Subnet.IPv4 != nil {
+			assert.NotNil(t, net.ParseIP(iface.VPC.Subnet.IPv4.InstanceAddress))
+		}
+		if iface.VPC.Subnet.IPv6 != nil {
+			for _, address := range iface.VPC.Subnet.IPv6.SLAAC {
+				assert.NotNil(t, net.ParseIP(address.InstanceAddress))
+			}
+		}
+	}
 }
